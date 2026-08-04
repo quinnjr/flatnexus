@@ -1,0 +1,80 @@
+@import 'tailwindcss';
+
+/* FlatNexus reads as infrastructure, not a storefront: a dark slate surface,
+   one warm accent for actions, and monospace anywhere a value is meant to be
+   copied into a terminal. */
+@theme {
+  --color-surface: #0f1117;
+  --color-surface-raised: #171a23;
+  --color-surface-sunken: #0a0c11;
+  --color-edge: #262a36;
+  --color-ink: #e6e8ee;
+  --color-ink-muted: #9aa1b1;
+  --color-accent: #f0883e;
+  --color-accent-soft: #f0883e1a;
+  --color-danger: #e5534b;
+  --color-ok: #3fb950;
+
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
+}
+
+html {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  color-scheme: dark;
+}
+
+body {
+  min-height: 100%;
+}
+
+/* Terminal-style block used for install commands and curl examples. */
+.command {
+  @apply relative overflow-x-auto rounded-md border px-4 py-3 font-mono text-sm;
+  background-color: var(--color-surface-sunken);
+  border-color: var(--color-edge);
+}
+
+.field-label {
+  @apply mb-1.5 block text-sm font-medium;
+  color: var(--color-ink-muted);
+}
+
+.field {
+  @apply w-full rounded-md border px-3 py-2 text-sm outline-none transition;
+  background-color: var(--color-surface-sunken);
+  border-color: var(--color-edge);
+  color: var(--color-ink);
+}
+
+.field:focus {
+  border-color: var(--color-accent);
+}
+
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+.btn-primary {
+  background-color: var(--color-accent);
+  color: #1a1006;
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.btn-ghost {
+  border: 1px solid var(--color-edge);
+  color: var(--color-ink);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  border-color: var(--color-accent);
+}
+
+.card {
+  @apply rounded-lg border p-5;
+  background-color: var(--color-surface-raised);
+  border-color: var(--color-edge);
+}

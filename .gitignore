@@ -1,0 +1,19 @@
+# Rust
+target/
+
+# Node
+node_modules/
+.svelte-kit/
+build/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Runtime data: the OSTree repository, staging space, and archived bundles
+flatnexus-backend/data/
+
+# Editors
+.DS_Store
+*.swp

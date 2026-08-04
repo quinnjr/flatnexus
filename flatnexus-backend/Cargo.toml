@@ -1,0 +1,88 @@
+[package]
+name = "flatnexus-backend"
+version = "0.1.0"
+edition = "2024"
+# Matches `armature-core` 0.8's own MSRV. This is load-bearing, not cosmetic:
+# edition 2024 selects Cargo's MSRV-aware resolver, so declaring anything lower
+# makes it satisfy the `armature-core = "0"` requirements in armature-auth and
+# armature-graphql with core 0.2.3 (MSRV 1.89) while the explicit requirement
+# below still pulls 0.8.2 — two incompatible copies in one graph, and
+# `armature-auth` then fails to compile against the older one.
+rust-version = "1.94.1"
+description = "GraphQL backend and Flatpak/OSTree distribution point for FlatNexus"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+# --- Armature framework -----------------------------------------------------
+# The individual crates, not the `armature-framework` meta-crate.
+#
+# Every armature crate declares `armature-core = "0"`. For a 0.x crate, where each
+# minor release is breaking, that requirement is too loose for Cargo to resolve
+# into one version: depending on `armature-framework 0.5.0` drags in its stale
+# siblings (auth 0.1.2, graphql 0.2.0, jwt 0.1.1), Cargo satisfies those with
+# `armature-core 0.2.3`, and the current crates land on 0.8.2 — two incompatible
+# copies in one graph, and `armature-auth 0.2.0` then fails to compile because
+# `armature_core::crypto` does not exist in 0.2.3.
+#
+# Naming the current crates directly keeps exactly one `armature-core`. The
+# meta-crate contributes only a prelude and feature plumbing, both of which are
+# cheap to replace — see `src/prelude.rs`. Switch back to
+# `armature-framework = "0.x"` once it depends on its current siblings.
+armature-core = "0.8"
+armature-proc-macro = "0.3"
+armature-graphql = "0.4"
+armature-auth = "0.2"
+armature-jwt = "0.2"
+armature-log = "0.2"
+armature-mail = "0.2"
+# Required directly, not only via armature-graphql: the `#[Object]` /
+# `#[derive(SimpleObject)]` macros expand to absolute `::async_graphql` paths.
+# `dataloader` batches the per-row resolvers on `Application`; without it a
+# hundred-application query costs two hundred extra round trips.
+async-graphql = { version = "7.2", features = ["dataloader"] }
+
+# Used for one thing: verifying a GitHub address is actually verified. See the
+# comment in src/auth/oauth.rs. Version and TLS backend match armature-auth's so
+# the two share one client stack.
+reqwest = { version = "0.13", features = ["json", "rustls"], default-features = false }
+
+# --- Object storage (DigitalOcean Spaces) -----------------------------------
+# The AWS S3 SDK directly rather than armature-storage: its `Storage` trait
+# takes `Bytes` for a write, which would materialize a whole bundle in memory.
+# Multipart upload streamed from disk needs the SDK's own part API.
+aws-config = "1.8"
+aws-sdk-s3 = "1.122"
+# `rt-tokio` provides `ByteStream::read_from()`, which streams a byte range of a
+# file as a request body.
+aws-smithy-types = { version = "1.6", features = ["rt-tokio"] }
+
+# --- Persistence (Prax ORM) -------------------------------------------------
+prax-orm = { version = "0.11", features = ["postgres"] }
+prax-postgres = "0.11"
+prax-query = "0.11"
+
+# --- Runtime ----------------------------------------------------------------
+tokio = { version = "1.47", features = ["full"] }
+async-trait = "0.1"
+
+# --- Serialization ----------------------------------------------------------
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# --- Crypto / auth ----------------------------------------------------------
+argon2 = { version = "0.5", features = ["std"] }
+totp-rs = { version = "5.7", default-features = false }
+base32 = "0.5"
+sha2 = "0.10"
+hex = "0.4"
+rand = "0.8"
+subtle = "2.6"
+
+# --- Utilities --------------------------------------------------------------
+chrono = { version = "0.4", features = ["clock"] }
+uuid = { version = "1", features = ["v4"] }
+thiserror = "2"
+tempfile = "3"
+dotenvy = "0.15"
+urlencoding = "2"
